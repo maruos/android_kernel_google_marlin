@@ -1596,7 +1596,14 @@ SYSCALL_DEFINE5(keyctl, int, option, unsigned long, arg2, unsigned long, arg3,
 					     (int) arg3);
 
 	case KEYCTL_JOIN_SESSION_KEYRING:
-		return keyctl_join_session_keyring((const char __user *) arg2);
+		// region @maru
+		// return keyctl_join_session_keyring((const char __user *) arg2);
+		// The newest systemd will call keyctl with KEYCTL_JOIN_SESSION_KEYRING
+		// to give a refresh session keyring to each service, but it will cause
+		// the process in Linux can't get correct keyring, what causes the
+		// "Required key not found" error for critical commands, such as mktemp.
+		return -1;
+		// endregion
 
 	case KEYCTL_UPDATE:
 		return keyctl_update_key((key_serial_t) arg2,
